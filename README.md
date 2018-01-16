@@ -5,6 +5,7 @@ Hard-coded encryption key remote file upload exploit for CVE-2017-11317, CVE-201
 
 ## To do
 - [ ] Missing HMAC functionality for later versions.
+- [ ] Brute force versions.
 
 ## Vulnerabilities
 The CVE-2017-11317 vulnerability was discovered by others. Shorlty after it was announced, I encountered the Telerik library during the course of my work, so I researched it and the vulnerability and wrote this exploit in July 2017. I also reported CVE-2017-11357 for the related insecure direct object reference.
