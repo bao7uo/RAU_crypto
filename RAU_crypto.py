@@ -275,8 +275,8 @@ def mode_help():
         "Gen rauPostData:          -E TempTargetFolder Version\n" +
         "Gen rauPostData (quiet):  -Q TempTargetFolder Version\n" +
         "Version in HTTP response: -v url\n" +
-        "Generate a POST payload:  -p TempTargetFolder Version filename\n" +
-        "Upload a payload:         -P TempTargetFolder Version filename url\n\n"
+        "Generate a POST payload:  -p TempTargetFolder Version c:\\\\folder\\\\filename\n" +
+        "Upload a payload:         -P TempTargetFolder Version c:\\\\folder\\\\filename url\n\n"
         "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau"
     )
 
