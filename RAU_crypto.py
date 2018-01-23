@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-# Author: Paul Taylor / Forgenix Ltd
+# Author: Paul Taylor / Foregenix Ltd
+# https://github.com/bao7uo/RAU_crypto/blob/master/RAU_crypto.py
 
 # RAU crypto - Exploiting CVE-2017-11317, CVE-2017-11357
 
@@ -12,6 +13,8 @@
 # versions R2 2017 SP1 (2017.2.621) and providing the ability to disable the
 # RadAsyncUpload feature in R2 2017 SP2 (2017.2.711)
 
+# https://www.telerik.com/support/kb/aspnet-ajax/upload-(async)/details/unrestricted-file-upload
+# https://www.telerik.com/support/kb/aspnet-ajax/upload-(async)/details/insecure-direct-object-reference
 # http://docs.telerik.com/devtools/aspnet-ajax/controls/asyncupload/security
 
 # http://target/Telerik.Web.UI.WebResource.axd?type=rau
