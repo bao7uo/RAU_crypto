@@ -3,6 +3,9 @@
 
 Hard-coded encryption key remote file upload exploit for CVE-2017-11317, CVE-2017-11357 (Telerik UI for ASP.NET AJAX). Allows for straightforward decryption and encryption of the rauPostData used with Telerik.Web.UI.WebResource.axd?type=rau and resulting in arbitrary file uploads. The exploit will automatically upload the file.
 
+## Published on exploit-db
+- https://www.exploit-db.com/exploits/43874/
+
 ## To do
 - [x] Missing HMAC functionality for later versions.
 - [ ] Brute force versions.
