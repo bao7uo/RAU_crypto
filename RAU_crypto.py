@@ -252,6 +252,7 @@ def mode_payload():
     TempTargetFolder = sys.argv[2]
     Version = sys.argv[3]
     payload_filename = sys.argv[4]
+    print("Content-Type: multipart/form-data; boundary=---------------------------68821516528156")
     print(payload(TempTargetFolder, Version, payload_filename))
 
 
