@@ -53,7 +53,7 @@ class RAUCipher:
                             )
         cipher = AES.new(RAUCipher.key, AES.MODE_CBC, RAUCipher.iv)
         sys.stderr.write("done\n")
-        return base64.b64encode(cipher.encrypt(plaintext)).decode()
+        return base64.b64encode(cipher.encrypt(bytes(plaintext, encoding = "utf8"))).decode()
 
     def decrypt(ciphertext):
         sys.stderr.write("Decrypting... ")
