@@ -9,12 +9,17 @@ Hard-coded encryption key remote file upload exploit for CVE-2017-11317, CVE-201
 ## Published on exploit-db
 - https://www.exploit-db.com/exploits/43874/
 
+## See also
+
+My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interest. It is available here:
+- https://github.com/bao7uo/dp_crypto
+
 ## To do
 - [x] Missing HMAC functionality for later versions.
 - [ ] Brute force versions.
 
 ## Vulnerabilities
-The CVE-2017-11317 vulnerability was discovered by others. Shorlty after it was announced, I encountered the Telerik library during the course of my work, so I researched it and the vulnerability and wrote this exploit in July 2017. I also reported CVE-2017-11357 for the related insecure direct object reference.
+The CVE-2017-11317 vulnerability was discovered by others. Shortly after it was announced, I encountered the Telerik library during the course of my work, so I researched it and the vulnerability and wrote this exploit in July 2017. I also reported CVE-2017-11357 for the related insecure direct object reference.
 
 https://www.telerik.com/support/kb/aspnet-ajax/upload-%28async%29/details/insecure-direct-object-reference
 
