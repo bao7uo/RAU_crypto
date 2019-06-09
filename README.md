@@ -52,7 +52,7 @@ $
 
 ## Custom payloads
 
-For details on custom payloads, there is a great article by @mwulftange on the Code White blog at the following link.
+For details on custom payloads, there is a great article by [@mwulftange]( https://github.com/mwulftange ) on the Code White blog at the following link.
 
 - https://codewhitesec.blogspot.com/2019/02/telerik-revisited.html
 
@@ -61,7 +61,7 @@ Other relevant links.
 - https://www.blackhat.com/docs/us-17/thursday/us-17-Munoz-Friday-The-13th-JSON-Attacks-wp.pdf
 - https://threatvector.cylance.com/en_us/home/implications-of-loading-net-assemblies.html
 
-Special thanks to @irsdl who inspired this feature.
+Special thanks to [@irsdl]( https://github.com/irsdl ) who inspired this feature.
 
 ## Example - decryption
 ![Decrypt screenshot](images/decrypt_screenshot.png)
