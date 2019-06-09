@@ -49,6 +49,11 @@ Version in HTTP response:           -v url [proxy]
 Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau
 $
 ```
+## Example - decryption
+![Decrypt screenshot](images/decrypt_screenshot.png)
+
+## Example - arbitrary file uplaod
+![Upload screenshot](images/upload_screenshot.png)
 
 ## Custom payloads
 
@@ -62,10 +67,3 @@ Other relevant links.
 - https://threatvector.cylance.com/en_us/home/implications-of-loading-net-assemblies.html
 
 Special thanks to [@irsdl]( https://github.com/irsdl ) who inspired this feature.
-
-## Example - decryption
-![Decrypt screenshot](images/decrypt_screenshot.png)
-
-## Example - arbitrary file uplaod
-![Upload screenshot](images/upload_screenshot.png)
-
