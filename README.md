@@ -16,7 +16,7 @@ My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interes
 
 ## To do
 - [x] Missing HMAC functionality for later versions.
-- [ ] Ability to specify custom key.
+- [x] Ability to specify custom key.
 - [ ] Brute force versions.
 
 ## Vulnerabilities
