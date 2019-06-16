@@ -376,11 +376,11 @@ def mode_help():
         "Upload file:                        -P c:\\\\destination\\\\folder Version c:\\\\local\\\\filename url [proxy]\n\n" +
 
         "Generate custom payload POST data : -c partA partB\n" +
-        "Send custom payload:                -c partA partB url [proxy]\n\n" +
+        "Send custom payload:                -C partA partB url [proxy]\n\n" +
 
         "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau\n"
         "Example Version:           2016.2.504\n"
-        "Example optional proxy:    127.0.0.1:8080"
+        "Example optional proxy:    127.0.0.1:8080\n"
         "\n" +
         "N.B. Advanced settings e.g. custom keys or PBKDB algorithm can be found by searching source code for: ADVANCED_SETTINGS\n"
     )
