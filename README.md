@@ -42,7 +42,7 @@ Generate all file upload POST data: -p c:\\destination\\folder Version ../local/
 Upload file:                        -P c:\\destination\\folder Version c:\\local\\filename url [proxy]
 
 Generate custom payload POST data : -c partA partB
-Send custom payload:                -c partA partB url [proxy]
+Send custom payload:                -C partA partB url [proxy]
 
 Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau
 Example Version format:    2016.2.504
