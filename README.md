@@ -18,6 +18,8 @@ My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interes
 - [x] Missing HMAC functionality for later versions.
 - [x] Ability to specify custom key.
 - [ ] Command line argument for execution of a mixed mode dll.
+- [ ] Separate utility for testing mixed mode dll.
+- [ ] Provide source code/compilation instructions for mixed mode dll.
 - [ ] Brute force versions.
 
 ## Vulnerabilities
