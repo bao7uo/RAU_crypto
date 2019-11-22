@@ -1,7 +1,7 @@
 # RAU_crypto
 [![Language](https://img.shields.io/badge/Lang-Python-blue.svg)](https://www.python.org)
 
-Hard-coded encryption key remote file upload exploit for CVE-2017-11317, CVE-2017-11357 (Telerik UI for ASP.NET AJAX). Allows for straightforward decryption and encryption of the rauPostData used with Telerik.Web.UI.WebResource.axd?type=rau and resulting in arbitrary file uploads. The exploit will automatically upload the file.
+Hard-coded encryption key remote file upload exploit for CVE-2017-11317, CVE-2017-11357 (Telerik UI for ASP.NET AJAX) and a .NET deserialisation vulnerability. Allows for straightforward decryption and encryption of the rauPostData used with Telerik.Web.UI.WebResource.axd?type=rau and resulting in arbitrary file uploads. The exploit will automatically upload the file.
 
 ## Requirements
 - python >= 3.6 with pycryptodome (https://blog.sqreen.io/stop-using-pycrypto-use-pycryptodome/) - best installed with `pip3 install pycryptodome`
@@ -17,15 +17,23 @@ My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interes
 ## To do
 - [x] Missing HMAC functionality for later versions.
 - [x] Ability to specify custom key.
-- [ ] Command line argument for execution of a mixed mode dll.
+- [ ] Command line argument for execution of a mixed mode dll (in the meantime use example provided below).
 - [ ] Separate utility for testing mixed mode dll.
 - [ ] Provide source code/compilation instructions for mixed mode dll.
 - [ ] Brute force versions.
 
+Note - the last four items are complete but not released.
+
 ## Vulnerabilities
-The CVE-2017-11317 vulnerability was discovered by others, I believe credits due to @straight_blast @pwntester @olekmirosh . Shortly after it was announced, I encountered the Telerik library during the course of my work, so I researched it and the vulnerability and wrote this exploit in July 2017. I also reported CVE-2017-11357 for the related insecure direct object reference.
+The file upload (CVE-2017-11317) vulnerability was discovered by others, I believe credits due to @straight_blast @pwntester @olekmirosh . Shortly after it was announced, I encountered the Telerik library during the course of my work, so I researched it and the vulnerability and wrote this exploit in July 2017. I also reported CVE-2017-11357 for the related insecure direct object reference.
 
 https://www.telerik.com/support/kb/aspnet-ajax/upload-%28async%29/details/insecure-direct-object-reference
+
+The .NET deserialisation vulnerability was discovered by [@mwulftange]( https://github.com/mwulftange ).
+
+https://www.telerik.com/support/kb/aspnet-ajax/upload-%27async%28/details/unrestricted-file-upload
+https://docs.telerik.com/devtools/aspnet-ajax/controls/asyncupload/security#allowedcustommetadatatypes
+https://docs.telerik.com/devtools/aspnet-ajax/controls/scriptmanager/assembly-white-list
 
 ## Usage
 ```
@@ -62,7 +70,7 @@ $
 
 ## Custom payload (deserialisation)
 
-For details on custom payloads for deserialisation, there is a great article by [@mwulftange]( https://github.com/mwulftange ) on the Code White blog at the following link.
+For details on custom payloads for .NET deserialisation, there is a great article by [@mwulftange]( https://github.com/mwulftange ) who discovered this vulnerability on the Code White blog at the following link.
 
 - https://codewhitesec.blogspot.com/2019/02/telerik-revisited.html
 
