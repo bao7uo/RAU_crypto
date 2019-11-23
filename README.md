@@ -78,6 +78,7 @@ Other relevant links.
 
 - https://www.blackhat.com/docs/us-17/thursday/us-17-Munoz-Friday-The-13th-JSON-Attacks-wp.pdf
 - https://threatvector.cylance.com/en_us/home/implications-of-loading-net-assemblies.html
+- https://thewover.github.io/Mixed-Assemblies/
 
 Example .NET deserialisation payload:
 
