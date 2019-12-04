@@ -140,7 +140,6 @@ class RAUCipher:
 #    print(binascii.hexlify(iv).decode().upper())
 
     def encrypt(plaintext):
-        sys.stderr.write("Encrypting... ")
         encoded = ""
         for i in plaintext:
             encoded = encoded + i + "\x00"
@@ -149,16 +148,13 @@ class RAUCipher:
                                 (16 - (len(encoded) % 16))
                             )
         cipher = AES.new(RAUCipher.key, AES.MODE_CBC, RAUCipher.iv)
-        sys.stderr.write("done\n")
         return base64.b64encode(cipher.encrypt(plaintext.encode())).decode()
 
 
     def decrypt(ciphertext):
-        sys.stderr.write("Decrypting... ")
         ciphertext = base64.b64decode(ciphertext)
         cipher = AES.new(RAUCipher.key, AES.MODE_CBC, RAUCipher.iv)
         unpad = lambda s: s[0:-ord(chr(s[-1]))]
-        sys.stderr.write("done\n")
         return unpad(cipher.decrypt(ciphertext)).decode()[0::2]
 
 
