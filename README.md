@@ -19,7 +19,7 @@ My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interes
 - [x] Ability to specify custom key.
 - [ ] Command line argument for execution of a mixed mode dll (in the meantime use the example .NET deserialisation payload provided below).
 - [ ] Separate utility for testing mixed mode dll.
-- [ ] Provide source code/compilation instructions for mixed mode dll.
+- [x] Provide source code/compilation instructions for mixed mode dll.
 - [ ] Brute force versions.
 
 Note - the last four items are complete but not released.
@@ -89,6 +89,6 @@ $ ./RAU_crypto.py -C '{"Path":"file:///c:/users/public/documents/mixedmode64.dll
 Mixed Mode DLL
 
 See my other github repo:
-https://github.com/bao7uo/MixedUp
+- https://github.com/bao7uo/MixedUp
 
 Special thanks to [@irsdl]( https://github.com/irsdl ) who inspired the custom payload feature.
