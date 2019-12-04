@@ -384,34 +384,35 @@ def mode_help():
         "N.B. Advanced settings e.g. custom keys or PBKDB algorithm can be found by searching source code for: ADVANCED_SETTINGS\n"
     )
 
+if __name__ == "__main__":
 
-sys.stderr.write("\nRAU_crypto by Paul Taylor / @bao7uo \n")
-sys.stderr.write(
-        "CVE-2017-11317 - " +
-        "Telerik RadAsyncUpload hardcoded keys / arbitrary file upload\n\n"
-        )
+    sys.stderr.write("\nRAU_crypto by Paul Taylor / @bao7uo \n")
+    sys.stderr.write(
+            "CVE-2017-11317 - " +
+            "Telerik RadAsyncUpload hardcoded keys / arbitrary file upload\n\n"
+            )
 
-if len(sys.argv) < 2:
-    mode_help()
-elif sys.argv[1] == "-d" and len(sys.argv) == 3:
-    mode_decrypt()
-elif sys.argv[1] == "-D" and len(sys.argv) == 3:
-    mode_Decrypt_rauPostData()
-elif sys.argv[1] == "-e" and len(sys.argv) == 3:
-    mode_encrypt()
-elif sys.argv[1] == "-E" and len(sys.argv) == 4:
-    mode_Encrypt_rauPostData()
-elif sys.argv[1] == "-c" and len(sys.argv) == 4:
-    mode_encrypt_custom_Payload()
-elif sys.argv[1] == "-C" and len(sys.argv) == 5:
-    mode_send_custom_Payload()
-elif sys.argv[1] == "-C" and len(sys.argv) == 6:
-    mode_send_custom_Payload_proxy()   
-elif sys.argv[1] == "-p" and len(sys.argv) == 5:
-    mode_payload()
-elif sys.argv[1] == "-P" and len(sys.argv) == 6:
-    mode_Post()
-elif sys.argv[1] == "-P" and len(sys.argv) == 7:
-    mode_Post_Proxy()
-else:
-    mode_help()
+    if len(sys.argv) < 2:
+        mode_help()
+    elif sys.argv[1] == "-d" and len(sys.argv) == 3:
+        mode_decrypt()
+    elif sys.argv[1] == "-D" and len(sys.argv) == 3:
+        mode_Decrypt_rauPostData()
+    elif sys.argv[1] == "-e" and len(sys.argv) == 3:
+        mode_encrypt()
+    elif sys.argv[1] == "-E" and len(sys.argv) == 4:
+        mode_Encrypt_rauPostData()
+    elif sys.argv[1] == "-c" and len(sys.argv) == 4:
+        mode_encrypt_custom_Payload()
+    elif sys.argv[1] == "-C" and len(sys.argv) == 5:
+        mode_send_custom_Payload()
+    elif sys.argv[1] == "-C" and len(sys.argv) == 6:
+        mode_send_custom_Payload_proxy()
+    elif sys.argv[1] == "-p" and len(sys.argv) == 5:
+        mode_payload()
+    elif sys.argv[1] == "-P" and len(sys.argv) == 6:
+        mode_Post()
+    elif sys.argv[1] == "-P" and len(sys.argv) == 7:
+        mode_Post_Proxy()
+    else:
+        mode_help()
