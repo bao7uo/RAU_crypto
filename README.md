@@ -41,8 +41,7 @@ https://www.telerik.com/support/kb/aspnet-ajax/details/allows-javascriptserializ
 $ ./RAU_crypto.py 
 
 RAU_crypto by Paul Taylor / @bao7uo 
-CVE-2017-11317 - Telerik RadAsyncUpload hardcoded keys / arbitrary file upload
-CVE-2019-18935 - Telerik .NET deserialisation
+CVE-2017-11317, CVE-2019-18935 - Telerik RadAsyncUpload hardcoded keys / arbitrary file upload / .NET deserialisation
 
 Usage:
 
