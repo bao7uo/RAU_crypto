@@ -1,16 +1,19 @@
 # RAU_crypto
 [![Language](https://img.shields.io/badge/Lang-Python-blue.svg)](https://www.python.org)
 
-Hard-coded encryption key remote file upload exploit for CVE-2017-11317, CVE-2017-11357 (Telerik UI for ASP.NET AJAX) and a .NET deserialisation vulnerability. Allows for straightforward decryption and encryption of the rauPostData used with Telerik.Web.UI.WebResource.axd?type=rau and resulting in arbitrary file uploads. The exploit will automatically upload the file.
+Combined exploit for Telerik UI for ASP.NET AJAX.
+- File upload for CVE-2017-11317 and CVE-2017-11357 - will automatically upload the file
+- .NET deserialisation for CVE-2019-18935
+
+For exploitation to work, you generally need a version with hard coded keys, or you need to know the key, for example if you can disclose the contents of web.config. The exploit also allows for straightforward decryption and encryption of the rauPostData used with Telerik.Web.UI.WebResource.axd?type=rau
 
 ## Requirements
-- python >= 3.6 with pycryptodome (https://blog.sqreen.io/stop-using-pycrypto-use-pycryptodome/) - best installed with `pip3 install pycryptodome`
+- python >= 3.6 with pycryptodome (https://www.pycryptodome.org/en/latest/src/installation.html) - installed with `pip3 install pycryptodome` or `pip3 install pycryptodomex`
 
-## Published on exploit-db
+## Published on exploit-db (old version)
 - https://www.exploit-db.com/exploits/43874/
 
 ## See also
-
 My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interest. It is available here:
 - https://github.com/bao7uo/dp_crypto
 
@@ -29,11 +32,9 @@ The file upload (CVE-2017-11317) vulnerability was discovered by others, I belie
 
 https://www.telerik.com/support/kb/aspnet-ajax/upload-%28async%29/details/insecure-direct-object-reference
 
-The .NET deserialisation vulnerability was discovered by [@mwulftange]( https://github.com/mwulftange ).
+The .NET deserialisation (CVE-2019-18935) vulnerability was discovered by [@mwulftange]( https://github.com/mwulftange ).
 
-https://www.telerik.com/support/kb/aspnet-ajax/upload-%27async%28/details/unrestricted-file-upload
-https://docs.telerik.com/devtools/aspnet-ajax/controls/asyncupload/security#allowedcustommetadatatypes
-https://docs.telerik.com/devtools/aspnet-ajax/controls/scriptmanager/assembly-white-list
+https://www.telerik.com/support/kb/aspnet-ajax/details/allows-javascriptserializer-deserialization
 
 ## Usage
 ```
@@ -41,6 +42,7 @@ $ ./RAU_crypto.py
 
 RAU_crypto by Paul Taylor / @bao7uo 
 CVE-2017-11317 - Telerik RadAsyncUpload hardcoded keys / arbitrary file upload
+CVE-2019-18935 - Telerik .NET deserialisation
 
 Usage:
 
