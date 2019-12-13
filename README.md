@@ -75,6 +75,9 @@ For details on custom payloads for .NET deserialisation, there is a great articl
 
 - https://codewhitesec.blogspot.com/2019/02/telerik-revisited.html
 
+Update - There is an alternative exploit by Caleb Gross [@noperator]( https://github.com/noperator/CVE-2019-18935 ), which incorporates features from this exploit, with a great blog article explaining everything. Thanks also to Caleb for contributing to RAU_Crypto.
+- https://know.bishopfox.com/research/cve-2019-18935-remote-code-execution-in-telerik-ui
+
 Other relevant links.
 
 - https://www.blackhat.com/docs/us-17/thursday/us-17-Munoz-Friday-The-13th-JSON-Attacks-wp.pdf
