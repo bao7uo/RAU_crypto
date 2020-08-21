@@ -5,6 +5,8 @@ Combined exploit for Telerik UI for ASP.NET AJAX.
 - File upload for CVE-2017-11317 and CVE-2017-11357 - will automatically upload the file
 - .NET deserialisation for CVE-2019-18935
 
+Now supports testing for the target's ability to pull in remote payloads from an attacker-hosted SMB service. Use Burp Collaborator and/or Responder to facilitate testing whether the necessary pre-requisites are in place.
+
 For exploitation to work, you generally need a version with hard coded keys, or you need to know the key, for example if you can disclose the contents of web.config. The exploit also allows for straightforward decryption and encryption of the rauPostData used with Telerik.Web.UI.WebResource.axd?type=rau
 
 ## Requirements
