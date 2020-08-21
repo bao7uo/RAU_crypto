@@ -58,7 +58,7 @@ Upload file:                        -P c:\\destination\\folder Version c:\\local
 Generate custom payload POST data : -c partA partB
 Send custom payload:                -C partA partB url [proxy]
 
-Test Responder/Burp Collaborator    -R lhost url [proxy]
+Check remote SMB payload capability -r lhost url [proxy]
 
 Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau
 Example Version:           2016.2.504
