@@ -99,3 +99,5 @@ For mixed Mode DLL, see my other github repo:
 - https://github.com/bao7uo/MixedUp
 
 Special thanks to [@irsdl]( https://github.com/irsdl ) who inspired the custom payload feature.
+
+Credit to [@rwincey]( https://twitter.com/rwincey/status/1296774665239703552 ) who inspired the remote dll feature.
